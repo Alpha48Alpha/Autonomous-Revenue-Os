@@ -1,0 +1,66 @@
+[
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567801",
+    "position": 1,
+    "filepath": "src/pages/slides/Slide1Title.tsx",
+    "title": "Cover",
+    "description": "Autonomous Revenue OS — acquisition pitch cover with asking price",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567802",
+    "position": 2,
+    "filepath": "src/pages/slides/Slide2Product.tsx",
+    "title": "The Product",
+    "description": "Three apps: web dashboard, mobile app, and API server",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567803",
+    "position": 3,
+    "filepath": "src/pages/slides/Slide3Revenue.tsx",
+    "title": "Revenue Model",
+    "description": "Three pricing tiers: Growth $99, Scale $299, Enterprise $497 per month",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567804",
+    "position": 4,
+    "filepath": "src/pages/slides/Slide4Tech.tsx",
+    "title": "Tech Stack",
+    "description": "React, Expo, Node.js, PostgreSQL, Stripe, Twilio — production-grade monorepo",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567805",
+    "position": 5,
+    "filepath": "src/pages/slides/Slide5Features.tsx",
+    "title": "What's Included",
+    "description": "Live Stripe, CRM, SMS campaigns, proposals, autopilot agent, 50+ leads",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567806",
+    "position": 6,
+    "filepath": "src/pages/slides/Slide6Market.tsx",
+    "title": "The Opportunity",
+    "description": "AI revenue automation market, white-label potential, path to $2,990/mo",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567807",
+    "position": 7,
+    "filepath": "src/pages/slides/Slide7Valuation.tsx",
+    "title": "Valuation",
+    "description": "$75K asking price, $80–120K rebuild cost, 6–9 months of development time saved",
+    "speakerNotes": ""
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567808",
+    "position": 8,
+    "filepath": "src/pages/slides/Slide8Close.tsx",
+    "title": "Close",
+    "description": "Call to action — own a revenue machine, skip the build",
+    "speakerNotes": ""
+  }
+]

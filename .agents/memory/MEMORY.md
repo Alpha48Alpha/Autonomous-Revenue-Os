@@ -1,0 +1,1 @@
+- [Living Codex routing zones](living-codex-routing.md) — web app splits public marketing site (no AppLayout) from product app (AppLayout); dashboard lives at /dashboard, not /.

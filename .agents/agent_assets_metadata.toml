@@ -1,0 +1,103 @@
+uploads = []
+
+[[generated]]
+id = "hJ9KSR35wWSJOcg21o1J_"
+uri = "file://attached_assets/generated_images/app_icon_for_living_e2d8.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "iMEJoUyF9KeNgniiJbGVa"
+uri = "file://attached_assets/generated_images/elizabeth_rothchild_signature_logo.png"
+type = "image"
+title = "Elizabeth Rothchild signature logo"
+
+[[generated]]
+id = "sVvrBNdWQ50b67ir9OfLN"
+uri = "file://attached_assets/generated_images/elizabeth_rothschild_wealth_logo.png"
+type = "image"
+title = "wealth logo"
+
+[[generated]]
+id = "BarAN3zzXgSG9-dXrrC3m"
+uri = "file://attached_assets/generated_images/elizabeth_rothschild_signature.png"
+type = "image"
+title = "ink signature"
+
+[[generated]]
+id = "mR0DavL5tcpoUumLTKTgm"
+uri = "file://attached_assets/generated_images/elizabeth_rothschild_logo_lockup.png"
+type = "image"
+title = "logo lockup tagline"
+
+[[generated]]
+id = "w_Fzd6K6bF0UZrZVR3pn1"
+uri = "file://artifacts/living-codex-mobile/assets/images/icon.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "uL5c7AvwDSNE5XSonkylN"
+uri = "file://artifacts/living-codex-mobile/assets/images/splash-icon.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "VH-xRd0V7FVi1xKbwaVND"
+uri = "file://attached_assets/generated_images/elizabeth_rothchild_logo_star_lockup.png"
+type = "image"
+title = "elizabeth rothchild star lockup"
+
+[[generated]]
+id = "WJd2dyK23wjELJxj8LF6x"
+uri = "file://attached_assets/generated_images/elizabeth_rothchild_signature_wetink.png"
+type = "image"
+title = "elizabeth rothchild wet ink signature"
+
+[[outputs]]
+id = "bsMgVZF0_XeL9_Ick238N"
+uri = "file://attached_assets/generated_images/elizabeth_rothschild_wealth_logo.png"
+type = "image"
+title = "Elizabeth Rothschild — Wealth Logo (gold ER crest on matte black)"
+
+[[outputs]]
+id = "UaH1lwWkG7ekc4jwIG4gz"
+uri = "file://attached_assets/generated_images/elizabeth_rothschild_signature.png"
+type = "image"
+title = "Elizabeth Rothschild — Black Wet-Ink Cursive Signature (transparent background)"
+
+[[outputs]]
+id = "JQU8TCEEKF-NYrdt3LnY2"
+uri = "file://attached_assets/generated_images/elizabeth_rothschild_logo_lockup.png"
+type = "image"
+title = "Elizabeth Rothschild — Refined Logo Lockup (star + ER badge + tagline)"
+
+[[outputs]]
+id = "zEa7ebq8MGCv0vzwCaMFL"
+uri = "file://attached_assets/generated_images/elizabeth_rothchild_logo_star_lockup.png"
+type = "image"
+title = "Elizabeth Rothchild™ — Logo (Trademarked)"
+
+[[outputs]]
+id = "x6zndI9YDIeMG3skyOyQQ"
+uri = "file://attached_assets/generated_images/elizabeth_rothchild_signature_wetink.png"
+type = "image"
+title = "Elizabeth Rothchild™ — Signature (IP-Protected)"
+
+[[outputs]]
+id = "ZZt4kAz_aK6mcUwcaT-dX"
+uri = "file://deliverables/Autonomous_Revenue_OS_Investor_Proposal.md"
+type = "text"
+title = "Autonomous Revenue OS — Investor Proposal"
+
+[[outputs]]
+id = "rqOzZ1Sh1GUnshRGnsQNl"
+uri = "file://deliverables/Autonomous_Revenue_OS_Hiring_and_Budget_Plan.md"
+type = "text"
+title = "Who To Hire On Fiverr & Budget Plan"
+
+[[outputs]]
+id = "hl4oHjXAAXqrcUewlKb-m"
+uri = "file://artifacts/living-codex/public/pitch-deck.pdf"
+type = "pdf"
+title = "Autonomous Revenue OS — Complete Pitch Playbook (Signed)"

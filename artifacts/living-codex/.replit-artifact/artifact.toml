@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Autonomous Revenue OS"
+version = "1.0.0"
+id = "artifacts/living-codex"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24006
+
+[services.development]
+run = "pnpm --filter @workspace/living-codex run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/living-codex", "run", "build" ]
+publicDir = "artifacts/living-codex/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24006"
+BASE_PATH = "/"
