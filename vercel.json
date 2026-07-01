@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "buildCommand": "pnpm --filter @workspace/living-codex run build && pnpm --filter @workspace/api-server run build",
+  "installCommand": "pnpm install",
+  "outputDirectory": "artifacts/living-codex/dist/public",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index" }
+  ],
+  "env": {
+    "BASE_PATH": "/",
+    "NODE_ENV": "production"
+  },
+  "build": {
+    "env": {
+      "BASE_PATH": "/",
+      "PORT": "3000",
+      "NODE_ENV": "production"
+    }
+  }
+}
