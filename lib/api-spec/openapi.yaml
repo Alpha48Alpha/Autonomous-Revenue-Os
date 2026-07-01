@@ -1,0 +1,1788 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Autonomous Revenue OS API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: leads
+    description: Lead management
+  - name: companies
+    description: Company/account management
+  - name: deals
+    description: Deal pipeline management
+  - name: messages
+    description: In-house outreach messaging
+  - name: proposals
+    description: Proposal generation and tracking
+  - name: activities
+    description: Agent activity and proof-of-work timeline
+  - name: dashboard
+    description: Revenue dashboard and metrics
+  - name: agents
+    description: AI agent actions (lead gen, email, SMS)
+  - name: setup
+    description: Startup profile / onboarding
+  - name: transactions
+    description: Delivery receipts and transaction log
+  - name: billing
+    description: Stripe subscription billing
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # ── LEADS ────────────────────────────────────────────────────────────────────
+  /leads:
+    get:
+      operationId: listLeads
+      tags: [leads]
+      summary: List all leads
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [new, contacted, qualified, disqualified, converted]
+        - in: query
+          name: agentTeam
+          schema:
+            type: string
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of leads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Lead"
+    post:
+      operationId: createLead
+      tags: [leads]
+      summary: Create a lead
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeadInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+
+  /leads/summary:
+    get:
+      operationId: getLeadsSummary
+      tags: [leads]
+      summary: Lead pipeline summary and scoring breakdown
+      responses:
+        "200":
+          description: Lead summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeadsSummary"
+
+  /leads/import:
+    post:
+      operationId: importLeads
+      tags: [leads]
+      summary: Bulk import contacts as leads (name + phone)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ImportLeadsInput"
+      responses:
+        "200":
+          description: Import result with counts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportLeadsResult"
+
+  /leads/{id}:
+    get:
+      operationId: getLead
+      tags: [leads]
+      summary: Get a lead
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lead
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+    patch:
+      operationId: updateLead
+      tags: [leads]
+      summary: Update a lead
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeadUpdate"
+      responses:
+        "200":
+          description: Updated lead
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+    delete:
+      operationId: deleteLead
+      tags: [leads]
+      summary: Delete a lead
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── COMPANIES ────────────────────────────────────────────────────────────────
+  /companies:
+    get:
+      operationId: listCompanies
+      tags: [companies]
+      summary: List companies
+      responses:
+        "200":
+          description: List of companies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Company"
+    post:
+      operationId: createCompany
+      tags: [companies]
+      summary: Create a company
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompanyInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+
+  /companies/{id}:
+    get:
+      operationId: getCompany
+      tags: [companies]
+      summary: Get a company
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Company
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+    patch:
+      operationId: updateCompany
+      tags: [companies]
+      summary: Update a company
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompanyUpdate"
+      responses:
+        "200":
+          description: Updated company
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+    delete:
+      operationId: deleteCompany
+      tags: [companies]
+      summary: Delete a company
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── DEALS ────────────────────────────────────────────────────────────────────
+  /deals:
+    get:
+      operationId: listDeals
+      tags: [deals]
+      summary: List deals
+      parameters:
+        - in: query
+          name: stage
+          schema:
+            type: string
+            enum: [discovery, qualified, proposal, negotiation, closed_won, closed_lost]
+      responses:
+        "200":
+          description: List of deals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Deal"
+    post:
+      operationId: createDeal
+      tags: [deals]
+      summary: Create a deal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DealInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deal"
+
+  /deals/pipeline:
+    get:
+      operationId: getDealsPipeline
+      tags: [deals]
+      summary: Pipeline summary grouped by stage with totals
+      responses:
+        "200":
+          description: Pipeline summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DealsPipeline"
+
+  /deals/{id}:
+    get:
+      operationId: getDeal
+      tags: [deals]
+      summary: Get a deal
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deal"
+    patch:
+      operationId: updateDeal
+      tags: [deals]
+      summary: Update a deal
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DealUpdate"
+      responses:
+        "200":
+          description: Updated deal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Deal"
+    delete:
+      operationId: deleteDeal
+      tags: [deals]
+      summary: Delete a deal
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── MESSAGES (in-house outreach) ─────────────────────────────────────────────
+  /messages:
+    get:
+      operationId: listMessages
+      tags: [messages]
+      summary: List outreach messages
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [draft, sent, replied, bounced]
+        - in: query
+          name: leadId
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Message"
+    post:
+      operationId: createMessage
+      tags: [messages]
+      summary: Create an outreach message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+
+  /messages/stats:
+    get:
+      operationId: getMessageStats
+      tags: [messages]
+      summary: Outreach messaging stats (sent, replied, open rate)
+      responses:
+        "200":
+          description: Message stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageStats"
+
+  /messages/{id}:
+    get:
+      operationId: getMessage
+      tags: [messages]
+      summary: Get a message
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+    patch:
+      operationId: updateMessage
+      tags: [messages]
+      summary: Update message status
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageUpdate"
+      responses:
+        "200":
+          description: Updated message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+
+  # ── PROPOSALS ────────────────────────────────────────────────────────────────
+  /proposals:
+    get:
+      operationId: listProposals
+      tags: [proposals]
+      summary: List proposals
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [draft, sent, viewed, accepted, rejected]
+      responses:
+        "200":
+          description: List of proposals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Proposal"
+    post:
+      operationId: createProposal
+      tags: [proposals]
+      summary: Create a proposal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProposalInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Proposal"
+
+  /proposals/{id}:
+    get:
+      operationId: getProposal
+      tags: [proposals]
+      summary: Get a proposal
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Proposal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Proposal"
+    patch:
+      operationId: updateProposal
+      tags: [proposals]
+      summary: Update a proposal
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProposalUpdate"
+      responses:
+        "200":
+          description: Updated proposal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Proposal"
+
+  # ── ACTIVITIES ───────────────────────────────────────────────────────────────
+  /activities:
+    get:
+      operationId: listActivities
+      tags: [activities]
+      summary: Agent activity and proof-of-work timeline
+      parameters:
+        - in: query
+          name: agentTeam
+          schema:
+            type: string
+            enum: [research, opportunity, outreach, sales, crm, strategy, revenue_ops]
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: List of activities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Activity"
+    post:
+      operationId: createActivity
+      tags: [activities]
+      summary: Log an agent activity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActivityInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Activity"
+
+  /activities/proof-of-work:
+    get:
+      operationId: getProofOfWork
+      tags: [activities]
+      summary: Proof-of-work metrics per agent team
+      responses:
+        "200":
+          description: Proof of work summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProofOfWork"
+
+  # ── AGENTS ───────────────────────────────────────────────────────────────────
+  /agents/generate-leads:
+    post:
+      operationId: generateLeads
+      tags: [agents]
+      summary: AI agent generates leads based on startup profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateLeadsInput"
+      responses:
+        "200":
+          description: Generated leads
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerateLeadsResult"
+
+  /agents/send-email/{leadId}:
+    post:
+      operationId: sendEmail
+      tags: [agents]
+      summary: Agent sends a real email to a lead via Resend
+      parameters:
+        - in: path
+          name: leadId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendMessageInput"
+      responses:
+        "200":
+          description: Email sent — delivery receipt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeliveryReceipt"
+
+  /agents/send-sms/{leadId}:
+    post:
+      operationId: sendSms
+      tags: [agents]
+      summary: Agent sends a real SMS to a lead via Twilio
+      parameters:
+        - in: path
+          name: leadId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendMessageInput"
+      responses:
+        "200":
+          description: SMS sent — delivery receipt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeliveryReceipt"
+
+  /agents/send-sms-bulk:
+    post:
+      operationId: sendSmsBulk
+      tags: [agents]
+      summary: Send SMS to multiple leads via Twilio
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkSmsInput"
+      responses:
+        "200":
+          description: Per-lead send results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkSmsResult"
+
+  # ── SETUP ─────────────────────────────────────────────────────────────────────
+  /setup:
+    get:
+      operationId: getSetup
+      tags: [setup]
+      summary: Get the current startup profile
+      responses:
+        "200":
+          description: Startup profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StartupProfile"
+        "404":
+          description: No profile yet
+    post:
+      operationId: saveSetup
+      tags: [setup]
+      summary: Save / update startup profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StartupProfileInput"
+      responses:
+        "200":
+          description: Saved profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StartupProfile"
+
+  # ── TRANSACTIONS ──────────────────────────────────────────────────────────────
+  /transactions:
+    get:
+      operationId: listTransactions
+      tags: [transactions]
+      summary: List all delivery receipts / outreach transactions
+      parameters:
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [email, sms]
+        - in: query
+          name: status
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+
+  # ── BILLING ───────────────────────────────────────────────────────────────────
+  /billing/checkout:
+    post:
+      operationId: createCheckout
+      tags: [billing]
+      summary: Create Stripe checkout session
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                plan:
+                  type: string
+                  enum: [growth, scale, enterprise]
+                  default: enterprise
+      responses:
+        "200":
+          description: Checkout URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    nullable: true
+                  error:
+                    type: string
+                    nullable: true
+
+  /billing/status:
+    get:
+      operationId: getBillingStatus
+      tags: [billing]
+      summary: Get current subscription status
+      responses:
+        "200":
+          description: Billing status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillingStatus"
+
+  /billing/payment-links:
+    post:
+      operationId: savePaymentLinks
+      tags: [billing]
+      summary: Save Stripe Payment Link URLs for each plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentLinksInput"
+      responses:
+        "200":
+          description: Saved payment links
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentLinks"
+
+  /billing/webhook:
+    post:
+      operationId: stripeWebhook
+      tags: [billing]
+      summary: Stripe webhook endpoint
+      responses:
+        "200":
+          description: Received
+
+  # ── DASHBOARD ────────────────────────────────────────────────────────────────
+  /dashboard/metrics:
+    get:
+      operationId: getDashboardMetrics
+      tags: [dashboard]
+      summary: Executive revenue dashboard metrics
+      responses:
+        "200":
+          description: Dashboard metrics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardMetrics"
+
+  /dashboard/recent-activity:
+    get:
+      operationId: getDashboardRecentActivity
+      tags: [dashboard]
+      summary: Recent cross-entity activity feed for the command center
+      responses:
+        "200":
+          description: Recent activity feed
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityFeedItem"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required: [status]
+
+    # ── LEAD ───────────────────────────────────────────────────────────────────
+    Lead:
+      type: object
+      required: [id, name, status, score, agentTeam, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: ["string", "null"]
+        company:
+          type: ["string", "null"]
+        title:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        linkedinUrl:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [new, contacted, qualified, disqualified, converted]
+        score:
+          type: integer
+          description: 0-100 lead quality score
+        agentTeam:
+          type: string
+          description: Which agent team discovered this lead
+        source:
+          type: ["string", "null"]
+          description: Where the lead was found
+        notes:
+          type: ["string", "null"]
+        companyId:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    LeadInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        company:
+          type: string
+        title:
+          type: string
+        phone:
+          type: string
+        linkedinUrl:
+          type: string
+        status:
+          type: string
+          enum: [new, contacted, qualified, disqualified, converted]
+        score:
+          type: integer
+        agentTeam:
+          type: string
+        source:
+          type: string
+        notes:
+          type: string
+        companyId:
+          type: integer
+
+    LeadUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        company:
+          type: string
+        title:
+          type: string
+        phone:
+          type: string
+        linkedinUrl:
+          type: string
+        status:
+          type: string
+          enum: [new, contacted, qualified, disqualified, converted]
+        score:
+          type: integer
+        agentTeam:
+          type: string
+        source:
+          type: string
+        notes:
+          type: string
+        companyId:
+          type: integer
+
+    LeadsSummary:
+      type: object
+      required: [total, byStatus, byScore, totalPipelineValue]
+      properties:
+        total:
+          type: integer
+        byStatus:
+          type: array
+          items:
+            type: object
+            required: [status, count]
+            properties:
+              status:
+                type: string
+              count:
+                type: integer
+        byScore:
+          type: object
+          required: [hot, warm, cold]
+          properties:
+            hot:
+              type: integer
+            warm:
+              type: integer
+            cold:
+              type: integer
+        totalPipelineValue:
+          type: number
+
+    # ── COMPANY ────────────────────────────────────────────────────────────────
+    Company:
+      type: object
+      required: [id, name, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        domain:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+        size:
+          type: ["string", "null"]
+          description: "e.g. '1-10', '11-50', '51-200', '200+'"
+        website:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        linkedinUrl:
+          type: ["string", "null"]
+        leadCount:
+          type: integer
+        dealCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    CompanyInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        domain:
+          type: string
+        industry:
+          type: string
+        size:
+          type: string
+        website:
+          type: string
+        description:
+          type: string
+        linkedinUrl:
+          type: string
+
+    CompanyUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        domain:
+          type: string
+        industry:
+          type: string
+        size:
+          type: string
+        website:
+          type: string
+        description:
+          type: string
+        linkedinUrl:
+          type: string
+
+    # ── DEAL ───────────────────────────────────────────────────────────────────
+    Deal:
+      type: object
+      required: [id, title, stage, value, probability, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        stage:
+          type: string
+          enum: [discovery, qualified, proposal, negotiation, closed_won, closed_lost]
+        value:
+          type: number
+          description: Deal value in USD
+        probability:
+          type: integer
+          description: Close probability 0-100
+        expectedCloseDate:
+          type: ["string", "null"]
+          format: date
+        leadId:
+          type: ["integer", "null"]
+        companyId:
+          type: ["integer", "null"]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    DealInput:
+      type: object
+      required: [title, stage, value]
+      properties:
+        title:
+          type: string
+        stage:
+          type: string
+          enum: [discovery, qualified, proposal, negotiation, closed_won, closed_lost]
+        value:
+          type: number
+        probability:
+          type: integer
+        expectedCloseDate:
+          type: string
+          format: date
+        leadId:
+          type: integer
+        companyId:
+          type: integer
+        notes:
+          type: string
+
+    DealUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        stage:
+          type: string
+          enum: [discovery, qualified, proposal, negotiation, closed_won, closed_lost]
+        value:
+          type: number
+        probability:
+          type: integer
+        expectedCloseDate:
+          type: string
+          format: date
+        leadId:
+          type: integer
+        companyId:
+          type: integer
+        notes:
+          type: string
+
+    DealsPipeline:
+      type: object
+      required: [totalValue, weightedValue, stages]
+      properties:
+        totalValue:
+          type: number
+        weightedValue:
+          type: number
+        closedWonValue:
+          type: number
+        stages:
+          type: array
+          items:
+            type: object
+            required: [stage, count, value]
+            properties:
+              stage:
+                type: string
+              count:
+                type: integer
+              value:
+                type: number
+
+    # ── MESSAGE ────────────────────────────────────────────────────────────────
+    Message:
+      type: object
+      required: [id, subject, body, status, channel, createdAt]
+      properties:
+        id:
+          type: integer
+        subject:
+          type: string
+        body:
+          type: string
+        status:
+          type: string
+          enum: [draft, sent, replied, bounced]
+        channel:
+          type: string
+          enum: [email, linkedin, sms, other]
+        leadId:
+          type: ["integer", "null"]
+        agentTeam:
+          type: ["string", "null"]
+        sentAt:
+          type: ["string", "null"]
+          format: date-time
+        repliedAt:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    MessageInput:
+      type: object
+      required: [subject, body, channel]
+      properties:
+        subject:
+          type: string
+        body:
+          type: string
+        channel:
+          type: string
+          enum: [email, linkedin, sms, other]
+        status:
+          type: string
+          enum: [draft, sent, replied, bounced]
+        leadId:
+          type: integer
+        agentTeam:
+          type: string
+
+    MessageUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [draft, sent, replied, bounced]
+        sentAt:
+          type: string
+          format: date-time
+        repliedAt:
+          type: string
+          format: date-time
+
+    MessageStats:
+      type: object
+      required: [totalSent, totalReplied, replyRate, byChannel]
+      properties:
+        totalSent:
+          type: integer
+        totalReplied:
+          type: integer
+        replyRate:
+          type: number
+        byChannel:
+          type: array
+          items:
+            type: object
+            required: [channel, sent, replied]
+            properties:
+              channel:
+                type: string
+              sent:
+                type: integer
+              replied:
+                type: integer
+
+    # ── PROPOSAL ───────────────────────────────────────────────────────────────
+    Proposal:
+      type: object
+      required: [id, title, status, value, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        status:
+          type: string
+          enum: [draft, sent, viewed, accepted, rejected]
+        value:
+          type: number
+        content:
+          type: ["string", "null"]
+        leadId:
+          type: ["integer", "null"]
+        dealId:
+          type: ["integer", "null"]
+        companyId:
+          type: ["integer", "null"]
+        sentAt:
+          type: ["string", "null"]
+          format: date-time
+        viewedAt:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    ProposalInput:
+      type: object
+      required: [title, value]
+      properties:
+        title:
+          type: string
+        value:
+          type: number
+        content:
+          type: string
+        status:
+          type: string
+          enum: [draft, sent, viewed, accepted, rejected]
+        leadId:
+          type: integer
+        dealId:
+          type: integer
+        companyId:
+          type: integer
+
+    ProposalUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        value:
+          type: number
+        content:
+          type: string
+        status:
+          type: string
+          enum: [draft, sent, viewed, accepted, rejected]
+        sentAt:
+          type: string
+          format: date-time
+        viewedAt:
+          type: string
+          format: date-time
+
+    # ── ACTIVITY ───────────────────────────────────────────────────────────────
+    Activity:
+      type: object
+      required: [id, agentTeam, type, description, createdAt]
+      properties:
+        id:
+          type: integer
+        agentTeam:
+          type: string
+          enum: [research, opportunity, outreach, sales, crm, strategy, revenue_ops]
+        type:
+          type: string
+          enum: [lead_discovered, message_sent, reply_received, meeting_booked, proposal_sent, deal_closed, research_completed, opportunity_found]
+        description:
+          type: string
+        relatedEntityType:
+          type: ["string", "null"]
+          enum: ["lead", "deal", "message", "proposal", "company", null]
+        relatedEntityId:
+          type: ["integer", "null"]
+        value:
+          type: ["number", "null"]
+          description: Monetary value if applicable
+        createdAt:
+          type: string
+          format: date-time
+
+    ActivityInput:
+      type: object
+      required: [agentTeam, type, description]
+      properties:
+        agentTeam:
+          type: string
+          enum: [research, opportunity, outreach, sales, crm, strategy, revenue_ops]
+        type:
+          type: string
+          enum: [lead_discovered, message_sent, reply_received, meeting_booked, proposal_sent, deal_closed, research_completed, opportunity_found]
+        description:
+          type: string
+        relatedEntityType:
+          type: string
+          enum: [lead, deal, message, proposal, company]
+        relatedEntityId:
+          type: integer
+        value:
+          type: number
+
+    ProofOfWork:
+      type: object
+      required: [discovery, revenue, outreach, overall]
+      properties:
+        discovery:
+          type: object
+          required: [leadsDiscovered, opportunitiesFound, sourceQuality]
+          properties:
+            leadsDiscovered:
+              type: integer
+            opportunitiesFound:
+              type: integer
+            sourceQuality:
+              type: number
+        revenue:
+          type: object
+          required: [meetingsBooked, proposalsSent, dealsWon, revenueGenerated]
+          properties:
+            meetingsBooked:
+              type: integer
+            proposalsSent:
+              type: integer
+            dealsWon:
+              type: integer
+            revenueGenerated:
+              type: number
+        outreach:
+          type: object
+          required: [messagesSent, repliesReceived, replyRate]
+          properties:
+            messagesSent:
+              type: integer
+            repliesReceived:
+              type: integer
+            replyRate:
+              type: number
+        overall:
+          type: object
+          required: [totalActivities, activeAgents, phase]
+          properties:
+            totalActivities:
+              type: integer
+            activeAgents:
+              type: integer
+            phase:
+              type: string
+              description: "Phase 1 / Phase 2 / Phase 3"
+
+    # ── DASHBOARD ─────────────────────────────────────────────────────────────
+    DashboardMetrics:
+      type: object
+      required: [revenue, pipeline, leads, outreach, agents]
+      properties:
+        revenue:
+          type: object
+          required: [closedWon, target, growth]
+          properties:
+            closedWon:
+              type: number
+            target:
+              type: number
+            growth:
+              type: number
+              description: Month-over-month growth %
+        pipeline:
+          type: object
+          required: [totalValue, weightedValue, dealCount, conversionRate]
+          properties:
+            totalValue:
+              type: number
+            weightedValue:
+              type: number
+            dealCount:
+              type: integer
+            conversionRate:
+              type: number
+        leads:
+          type: object
+          required: [total, newThisWeek, qualifiedRate, hotLeads]
+          properties:
+            total:
+              type: integer
+            newThisWeek:
+              type: integer
+            qualifiedRate:
+              type: number
+            hotLeads:
+              type: integer
+        outreach:
+          type: object
+          required: [sent, replyRate, meetingsBooked]
+          properties:
+            sent:
+              type: integer
+            replyRate:
+              type: number
+            meetingsBooked:
+              type: integer
+        agents:
+          type: object
+          required: [active, totalActivities, topPerformer]
+          properties:
+            active:
+              type: integer
+            totalActivities:
+              type: integer
+            topPerformer:
+              type: string
+
+    # ── AGENTS ─────────────────────────────────────────────────────────────────
+    GenerateLeadsInput:
+      type: object
+      required: [count]
+      properties:
+        count:
+          type: integer
+          default: 5
+        industry:
+          type: string
+        targetRole:
+          type: string
+
+    GenerateLeadsResult:
+      type: object
+      required: [generated, leads]
+      properties:
+        generated:
+          type: integer
+        leads:
+          type: array
+          items:
+            $ref: "#/components/schemas/Lead"
+
+    ImportContact:
+      type: object
+      required: [name, phone]
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+
+    ImportLeadsInput:
+      type: object
+      required: [contacts]
+      properties:
+        contacts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ImportContact"
+        source:
+          type: string
+          description: Optional source label for the imported leads
+
+    ImportLeadsResult:
+      type: object
+      required: [added, skipped, failed, total]
+      properties:
+        total:
+          type: integer
+        added:
+          type: integer
+        skipped:
+          type: integer
+          description: Rows skipped as duplicates of existing phone numbers
+        failed:
+          type: integer
+          description: Rows that could not be parsed or had invalid phone numbers
+        failures:
+          type: array
+          items:
+            type: object
+            required: [name, reason]
+            properties:
+              name:
+                type: string
+              phone:
+                type: ["string", "null"]
+              reason:
+                type: string
+
+    BulkSmsInput:
+      type: object
+      required: [leadIds]
+      properties:
+        leadIds:
+          type: array
+          items:
+            type: integer
+        body:
+          type: string
+          description: Optional shared message body; if omitted, AI crafts one per lead
+
+    BulkSmsResult:
+      type: object
+      required: [total, sent, failed, results]
+      properties:
+        total:
+          type: integer
+        sent:
+          type: integer
+        failed:
+          type: integer
+        results:
+          type: array
+          items:
+            type: object
+            required: [leadId, name, success]
+            properties:
+              leadId:
+                type: integer
+              name:
+                type: string
+              recipient:
+                type: ["string", "null"]
+              success:
+                type: boolean
+              error:
+                type: ["string", "null"]
+
+    SendMessageInput:
+      type: object
+      properties:
+        subject:
+          type: string
+        body:
+          type: string
+
+    DeliveryReceipt:
+      type: object
+      required: [success, transactionId, provider, recipient, type, sentAt]
+      properties:
+        success:
+          type: boolean
+        transactionId:
+          type: integer
+        provider:
+          type: string
+        providerId:
+          type: ["string", "null"]
+        recipient:
+          type: string
+        type:
+          type: string
+        subject:
+          type: ["string", "null"]
+        body:
+          type: string
+        sentAt:
+          type: string
+          format: date-time
+        error:
+          type: ["string", "null"]
+
+    # ── SETUP ──────────────────────────────────────────────────────────────────
+    StartupProfile:
+      type: object
+      required: [id, companyName, industry, targetMarket, description, valueProp, icp, createdAt]
+      properties:
+        id:
+          type: integer
+        companyName:
+          type: string
+        industry:
+          type: string
+        targetMarket:
+          type: string
+        description:
+          type: string
+        valueProp:
+          type: string
+        icp:
+          type: string
+        website:
+          type: ["string", "null"]
+        linkedinUrl:
+          type: ["string", "null"]
+        paymentLinkGrowth:
+          type: ["string", "null"]
+        paymentLinkScale:
+          type: ["string", "null"]
+        paymentLinkEnterprise:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    StartupProfileInput:
+      type: object
+      required: [companyName, industry, targetMarket, description, valueProp, icp]
+      properties:
+        companyName:
+          type: string
+        industry:
+          type: string
+        targetMarket:
+          type: string
+        description:
+          type: string
+        valueProp:
+          type: string
+        icp:
+          type: string
+        website:
+          type: string
+        linkedinUrl:
+          type: string
+
+    # ── TRANSACTION ─────────────────────────────────────────────────────────────
+    Transaction:
+      type: object
+      required: [id, type, provider, status, recipient, createdAt]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [email, sms]
+        provider:
+          type: string
+        status:
+          type: string
+        providerId:
+          type: ["string", "null"]
+        leadId:
+          type: ["integer", "null"]
+        messageId:
+          type: ["integer", "null"]
+        recipient:
+          type: string
+        subject:
+          type: ["string", "null"]
+        body:
+          type: ["string", "null"]
+        cost:
+          type: ["number", "null"]
+        deliveredAt:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    # ── BILLING ─────────────────────────────────────────────────────────────────
+    BillingStatus:
+      type: object
+      required: [active, plan, configured]
+      properties:
+        active:
+          type: boolean
+        plan:
+          type: string
+        configured:
+          type: boolean
+        customerId:
+          type: ["string", "null"]
+        subscriptionId:
+          type: ["string", "null"]
+        currentPeriodEnd:
+          type: ["string", "null"]
+          format: date-time
+        error:
+          type: string
+          nullable: true
+        paymentLinks:
+          $ref: "#/components/schemas/PaymentLinks"
+
+    PaymentLinks:
+      type: object
+      properties:
+        growth:
+          type: ["string", "null"]
+        scale:
+          type: ["string", "null"]
+        enterprise:
+          type: ["string", "null"]
+
+    PaymentLinksInput:
+      type: object
+      properties:
+        growth:
+          type: ["string", "null"]
+        scale:
+          type: ["string", "null"]
+        enterprise:
+          type: ["string", "null"]
+
+    ActivityFeedItem:
+      type: object
+      required: [id, agentTeam, type, description, createdAt]
+      properties:
+        id:
+          type: integer
+        agentTeam:
+          type: string
+        type:
+          type: string
+        description:
+          type: string
+        relatedEntityType:
+          type: ["string", "null"]
+        relatedEntityId:
+          type: ["integer", "null"]
+        value:
+          type: ["number", "null"]
+        createdAt:
+          type: string
+          format: date-time
