@@ -57,14 +57,14 @@ request may take a few seconds while it wakes up, then it's fast.
 Only two are required to boot (`DATABASE_URL`, `PORT`). Everything else is optional and features
 degrade gracefully when unset. See [`.env.example`](.env.example) for the full list.
 
-**AI features** (lead generation + email drafting) use **Google Gemini** via the Vercel AI SDK.
-Set `GEMINI_API_KEY` (free key: https://aistudio.google.com/apikey). Without it, those specific
+**AI features** (lead generation + email drafting) use **Groq** via the Vercel AI SDK.
+Set `GROQ_API_KEY` (free key: https://console.groq.com/keys). Without it, those specific
 buttons return a clear "key not configured" message; the rest of the app works normally.
 
 > ⚠️ **Heads-up on the autopilot:** the server runs a lead-gen + SMS cycle every 2 hours. It only
 > sends **real** text messages once you (a) create a company profile at `/setup` **and** (b) set
-> `GEMINI_API_KEY` (needed to generate leads with phone numbers). Twilio keys in `.env` are live —
-> add the Gemini key only when you're ready for that.
+> `GROQ_API_KEY` (needed to generate leads with phone numbers). Twilio keys in `.env` are live —
+> add the Groq key only when you're ready for that.
 
 ---
 

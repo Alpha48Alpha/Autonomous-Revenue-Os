@@ -1,39 +1,32 @@
 /**
- * AI text generation — Google Gemini via the Vercel AI SDK.
+ * AI text generation — Groq (fast, free tier) via the Vercel AI SDK.
  *
- * Swappable: to move back to OpenAI later, add `@ai-sdk/openai` and switch the
- * `model` line below to `openai(MODEL)`. Everything that calls generateAIText()
- * stays unchanged.
+ * Swappable: to move to another provider later (Gemini, OpenAI, …), add its
+ * @ai-sdk/* package and change the `model` line below. Everything that calls
+ * generateAIText() stays unchanged.
  */
-import { google } from "@ai-sdk/google";
+import { groq } from "@ai-sdk/groq";
 import { generateText } from "ai";
 
-// The AI SDK's Google provider reads GOOGLE_GENERATIVE_AI_API_KEY. Accept the
-// friendlier GEMINI_API_KEY as an alias so either env var works.
-if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY && process.env.GEMINI_API_KEY) {
-  process.env.GOOGLE_GENERATIVE_AI_API_KEY = process.env.GEMINI_API_KEY;
-}
+// The AI SDK's Groq provider reads GROQ_API_KEY.
+const MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-2.0-flash";
-
-/** True when a Gemini API key is configured. */
+/** True when a Groq API key is configured. */
 export function hasAIKey(): boolean {
-  return Boolean(process.env.GOOGLE_GENERATIVE_AI_API_KEY);
+  return Boolean(process.env.GROQ_API_KEY);
 }
 
 /**
- * Single-shot prompt → raw text output from Gemini.
+ * Single-shot prompt → raw text output from the model.
  * Throws a clear error if no API key is configured.
  */
 export async function generateAIText(system: string, prompt: string): Promise<string> {
   if (!hasAIKey()) {
-    throw new Error(
-      "Gemini API key not configured — set GEMINI_API_KEY (or GOOGLE_GENERATIVE_AI_API_KEY).",
-    );
+    throw new Error("Groq API key not configured — set GROQ_API_KEY.");
   }
 
   const { text } = await generateText({
-    model: google(MODEL),
+    model: groq(MODEL),
     system,
     prompt,
   });

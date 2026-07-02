@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "wouter";
 import { motion, useReducedMotion } from "framer-motion";
 import {
@@ -9,6 +10,9 @@ import {
   TrendingUp,
   Users,
   Crown,
+  Sparkles,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import {
   MarketingLayout,
@@ -41,6 +45,156 @@ const doctrine = ["Observe.", "Understand.", "Execute.", "Create Value."];
 
 function scrollToVision() {
   document.getElementById("vision")?.scrollIntoView({ behavior: "smooth" });
+}
+
+type DemoLead = {
+  name?: string;
+  title?: string;
+  company?: string;
+  email?: string;
+  phone?: string;
+  score?: number;
+  notes?: string;
+};
+
+// Live demo: generates real B2B leads via the Gemini-powered AI agent.
+// Payment is bypassed (no Stripe key configured), and a demo company profile
+// is auto-created if one doesn't exist yet, so anyone can click and test it.
+function LiveAITest() {
+  const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [leads, setLeads] = useState<DemoLead[]>([]);
+  const [error, setError] = useState("");
+
+  async function run() {
+    setState("loading");
+    setError("");
+    setLeads([]);
+    try {
+      // Ensure a company profile exists (required by the lead-gen agent).
+      const existing = await fetch("/api/setup").then((r) => (r.ok ? r.json() : null));
+      if (!existing) {
+        await fetch("/api/setup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            companyName: "Autonomous Revenue OS",
+            industry: "AI SaaS",
+            targetMarket: "B2B SaaS founders",
+            description: "Autonomous venture operating system",
+            valueProp: "AI agents that discover leads and run revenue on autopilot",
+            icp: "Seed-stage B2B SaaS founders, 5–50 employees",
+          }),
+        });
+      }
+
+      const res = await fetch("/api/agents/generate-leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ count: 3 }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || `Request failed (HTTP ${res.status})`);
+      setLeads(Array.isArray(data.leads) ? data.leads : []);
+      setState("done");
+    } catch (e: any) {
+      setError(e?.message || "Something went wrong.");
+      setState("error");
+    }
+  }
+
+  return (
+    <section className="relative overflow-hidden border-t border-[#d4af37]/15 bg-[#080808]">
+      <div
+        className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[420px] -translate-x-1/2 rounded-full opacity-[0.12] blur-[130px]"
+        style={{ background: GOLD }}
+      />
+      <div className="relative mx-auto max-w-5xl px-6 py-28 text-center lg:px-10">
+        <Reveal>
+          <Overline>Live System · Try It Now</Overline>
+          <h2
+            className="mx-auto mt-6 max-w-3xl text-4xl tracking-tight text-[#f5f1e8] lg:text-5xl"
+            style={{ fontFamily: SERIF }}
+          >
+            Watch the AI generate real leads.
+          </h2>
+          <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-[#f5f1e8]/55">
+            No signup. No payment. Click below and the research agent will discover
+            three B2B leads live — powered by AI.
+          </p>
+
+          <button
+            onClick={run}
+            disabled={state === "loading"}
+            className="group mt-10 inline-flex items-center gap-2 rounded-sm px-8 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-[#050505] transition-all hover:shadow-[0_0_40px_rgba(212,175,55,0.5)] disabled:cursor-not-allowed disabled:opacity-70"
+            style={{ background: `linear-gradient(135deg, #f3dd8f, ${GOLD} 55%, #b8902b)` }}
+          >
+            {state === "loading" ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" /> Generating…
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" /> Generate Live Leads
+              </>
+            )}
+          </button>
+          <p className="mt-4 text-[0.7rem] uppercase tracking-[0.25em] text-[#f5f1e8]/35">
+            Demo mode · payment bypassed
+          </p>
+        </Reveal>
+
+        {state === "error" && (
+          <div className="mx-auto mt-10 flex max-w-xl items-start gap-3 rounded-lg border border-red-500/30 bg-red-500/5 p-5 text-left">
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-400" />
+            <div>
+              <p className="text-sm font-semibold text-red-300">Couldn’t generate leads</p>
+              <p className="mt-1 text-sm text-[#f5f1e8]/60">{error}</p>
+            </div>
+          </div>
+        )}
+
+        {state === "done" && leads.length > 0 && (
+          <div className="mt-12 grid gap-4 text-left sm:grid-cols-3">
+            {leads.map((lead, i) => (
+              <Reveal key={i} delay={i * 0.08}>
+                <GlassCard className="h-full p-6">
+                  <div className="flex items-center justify-between">
+                    <p className="text-lg text-[#f5f1e8]" style={{ fontFamily: SERIF }}>
+                      {lead.name || "Lead"}
+                    </p>
+                    {typeof lead.score === "number" && (
+                      <span className="rounded-full border border-[#d4af37]/40 px-2.5 py-0.5 text-xs text-[#d4af37]">
+                        {lead.score}
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-1 text-sm text-[#f5f1e8]/70">
+                    {lead.title}
+                    {lead.title && lead.company ? " · " : ""}
+                    {lead.company}
+                  </p>
+                  {lead.notes && (
+                    <p className="mt-3 text-sm leading-snug text-[#f5f1e8]/45">{lead.notes}</p>
+                  )}
+                  {(lead.email || lead.phone) && (
+                    <p className="mt-3 truncate text-xs text-[#d4af37]/70">
+                      {lead.email || lead.phone}
+                    </p>
+                  )}
+                </GlassCard>
+              </Reveal>
+            ))}
+          </div>
+        )}
+
+        {state === "done" && leads.length === 0 && (
+          <p className="mt-8 text-sm text-[#f5f1e8]/50">
+            The agent ran but returned no leads. Try again.
+          </p>
+        )}
+      </div>
+    </section>
+  );
 }
 
 export default function Home() {
@@ -326,6 +480,9 @@ export default function Home() {
           </Reveal>
         </div>
       </section>
+
+      {/* ───────────────── LIVE AI TEST (above footer) ───────────────── */}
+      <LiveAITest />
     </MarketingLayout>
   );
 }

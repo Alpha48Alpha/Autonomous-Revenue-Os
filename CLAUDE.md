@@ -63,21 +63,21 @@ Copy `.env.example` → `.env`. Only two vars are required to boot:
   without it ([lib/db/src/index.ts](lib/db/src/index.ts)).
 - `PORT` — defaults to `8080` in our setup.
 
-Optional (features degrade gracefully if unset): `GEMINI_API_KEY` (AI lead gen + email drafting
-+ autopilot — Google Gemini via the Vercel AI SDK; `GOOGLE_GENERATIVE_AI_API_KEY` also works, and
-`GEMINI_MODEL` overrides the default `gemini-2.0-flash`), `STRIPE_SECRET_KEY` /
-`STRIPE_WEBHOOK_SECRET` (billing/subscription gate), `TWILIO_*` (SMS), `RESEND_API_KEY` (email),
-`APP_URL`.
+Optional (features degrade gracefully if unset): `GROQ_API_KEY` (AI lead gen + email drafting +
+autopilot — Groq via the Vercel AI SDK; `GROQ_MODEL` overrides the default
+`llama-3.3-70b-versatile`), `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` (billing/subscription
+gate), `TWILIO_*` (SMS), `RESEND_API_KEY` (email), `APP_URL`.
 
 AI calls go through one helper — [artifacts/api-server/src/lib/ai.ts](artifacts/api-server/src/lib/ai.ts)
-(`generateAIText`). To switch providers (e.g. back to OpenAI), change only the `model` line there.
+(`generateAIText`). To switch providers (Gemini, OpenAI, …), add the matching `@ai-sdk/*` package
+and change only the `model` line there.
 
 `.env` is gitignored — never commit real secrets.
 
 ## ⚠️ Autopilot & live SMS
 
 `startAutopilot()` runs a cycle 30s after boot, then every 2h. It only sends **real** SMS once
-BOTH a company profile exists (created via `/setup`) AND `GEMINI_API_KEY` is set (needed to
+BOTH a company profile exists (created via `/setup`) AND `GROQ_API_KEY` is set (needed to
 generate leads with phone numbers). Twilio creds in `.env` are live — be deliberate before
 enabling both. See [artifacts/api-server/src/autopilot.ts](artifacts/api-server/src/autopilot.ts).
 
