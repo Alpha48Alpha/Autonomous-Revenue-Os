@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowUpRight,
@@ -10,9 +9,6 @@ import {
   TrendingUp,
   Users,
   Crown,
-  Sparkles,
-  Loader2,
-  AlertCircle,
 } from "lucide-react";
 import {
   MarketingLayout,
@@ -45,117 +41,6 @@ const doctrine = ["Observe.", "Understand.", "Execute.", "Create Value."];
 
 function scrollToVision() {
   document.getElementById("vision")?.scrollIntoView({ behavior: "smooth" });
-}
-
-// TEMP: only expose the client-demo button on localhost and the known prod URL.
-// (Hardcoded on purpose — no env var. Remove this + <LiveAITest/> when done.)
-const DEMO_HOSTS = ["localhost", "127.0.0.1", "autonomous-revenue-os.vercel.app"];
-function showLiveDemo(): boolean {
-  return typeof window !== "undefined" && DEMO_HOSTS.includes(window.location.hostname);
-}
-
-// TEMP demo button (for showing the client — not permanent product code).
-// Seeds a few AI leads, then drops the visitor straight into the full dashboard
-// — the exact experience a paying subscriber gets. Payment is bypassed because
-// no Stripe key is configured, so every page renders unlocked.
-function LiveAITest() {
-  const [, navigate] = useLocation();
-  const [state, setState] = useState<"idle" | "loading" | "error">("idle");
-  const [error, setError] = useState("");
-
-  async function launch() {
-    setState("loading");
-    setError("");
-    try {
-      // Ensure a company profile exists (the agents need one).
-      const profile = await fetch("/api/setup").then((r) => (r.ok ? r.json() : null));
-      if (!profile) {
-        await fetch("/api/setup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            companyName: "Autonomous Revenue OS",
-            industry: "AI SaaS",
-            targetMarket: "B2B SaaS founders",
-            description: "Autonomous venture operating system",
-            valueProp: "AI agents that discover leads and run revenue on autopilot",
-            icp: "Seed-stage B2B SaaS founders, 5–50 employees",
-          }),
-        });
-      }
-
-      // Seed a few AI leads so the dashboard looks live (skip if already populated).
-      const leads = await fetch("/api/leads").then((r) => (r.ok ? r.json() : []));
-      if (!Array.isArray(leads) || leads.length < 5) {
-        await fetch("/api/agents/generate-leads", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ count: 6 }),
-        }).catch(() => {});
-      }
-
-      // Enter the full product — no signup, no subscription.
-      navigate("/dashboard");
-    } catch (e: any) {
-      setError(e?.message || "Something went wrong. Please try again.");
-      setState("error");
-    }
-  }
-
-  return (
-    <section className="relative overflow-hidden border-t border-[#d4af37]/15 bg-[#080808]">
-      <div
-        className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[420px] -translate-x-1/2 rounded-full opacity-[0.12] blur-[130px]"
-        style={{ background: GOLD }}
-      />
-      <div className="relative mx-auto max-w-5xl px-6 py-28 text-center lg:px-10">
-        <Reveal>
-          <Overline>Live System · Try It Now</Overline>
-          <h2
-            className="mx-auto mt-6 max-w-3xl text-4xl tracking-tight text-[#f5f1e8] lg:text-5xl"
-            style={{ fontFamily: SERIF }}
-          >
-            Step inside the live platform.
-          </h2>
-          <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-[#f5f1e8]/55">
-            No signup. No payment. Click to enter the exact dashboard our subscribers
-            use — pre-loaded with fresh, AI-generated leads.
-          </p>
-
-          <button
-            onClick={launch}
-            disabled={state === "loading"}
-            className="group mt-10 inline-flex items-center gap-2 rounded-sm px-8 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-[#050505] transition-all hover:shadow-[0_0_40px_rgba(212,175,55,0.5)] disabled:cursor-not-allowed disabled:opacity-70"
-            style={{ background: `linear-gradient(135deg, #f3dd8f, ${GOLD} 55%, #b8902b)` }}
-          >
-            {state === "loading" ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" /> Preparing your workspace…
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-4 w-4" /> Launch Live Demo
-                <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-              </>
-            )}
-          </button>
-          <p className="mt-4 text-[0.7rem] uppercase tracking-[0.25em] text-[#f5f1e8]/35">
-            Demo mode · no signup · payment bypassed
-          </p>
-        </Reveal>
-
-        {state === "error" && (
-          <div className="mx-auto mt-10 flex max-w-xl items-start gap-3 rounded-lg border border-red-500/30 bg-red-500/5 p-5 text-left">
-            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-400" />
-            <div>
-              <p className="text-sm font-semibold text-red-300">Couldn’t start the demo</p>
-              <p className="mt-1 text-sm text-[#f5f1e8]/60">{error}</p>
-            </div>
-          </div>
-        )}
-      </div>
-    </section>
-  );
 }
 
 export default function Home() {
@@ -441,10 +326,6 @@ export default function Home() {
           </Reveal>
         </div>
       </section>
-
-      {/* ───────────────── LIVE AI TEST (above footer) — localhost + prod URL only ─────────────────
-          TEMP demo for client testing. Delete this block + the LiveAITest/showLiveDemo helpers to remove. */}
-      {showLiveDemo() && <LiveAITest />}
     </MarketingLayout>
   );
 }
