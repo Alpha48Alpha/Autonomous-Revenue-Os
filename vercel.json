@@ -1,20 +1,16 @@
 {
-  "version": 2,
-  "buildCommand": "pnpm --filter @workspace/living-codex run build && pnpm --filter @workspace/api-server run build",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
   "installCommand": "pnpm install",
+  "buildCommand": "pnpm --filter @workspace/living-codex run build",
   "outputDirectory": "artifacts/living-codex/dist/public",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index" },
     { "source": "/((?!assets/|favicon|robots|opengraph|.*\\.[a-zA-Z0-9]+$).*)", "destination": "/index.html" }
   ],
-  "env": {
-    "BASE_PATH": "/",
-    "NODE_ENV": "production"
-  },
   "build": {
     "env": {
       "BASE_PATH": "/",
-      "PORT": "3000",
       "NODE_ENV": "production"
     }
   }
