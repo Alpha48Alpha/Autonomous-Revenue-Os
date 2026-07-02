@@ -2,16 +2,9 @@ import { Router, Request, Response, NextFunction } from "express";
 import { db, leads, messages, transactions, startupProfiles, activities } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
 import { getAutopilotStatus, startAutopilot, stopAutopilot, runNow } from "../autopilot";
-import OpenAI from "openai";
+import { generateAIText } from "../lib/ai";
 
 export const agentsRouter = Router();
-
-function getOpenAI() {
-  const baseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
-  const apiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY || "dummy";
-  if (!baseURL) throw new Error("AI_INTEGRATIONS_OPENAI_BASE_URL not set");
-  return new OpenAI({ baseURL, apiKey });
-}
 
 type LeadRow = typeof leads.$inferSelect;
 type ProfileRow = typeof startupProfiles.$inferSelect;
@@ -315,17 +308,7 @@ Return a JSON array with exactly ${count} leads. Each object must have:
 Return ONLY the JSON array, no other text.`;
 
   try {
-    const openai = getOpenAI();
-    const completion = await openai.chat.completions.create({
-      model: "gpt-5-mini",
-      max_completion_tokens: 4096,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-    });
-
-    const rawText = completion.choices[0]?.message?.content || "[]";
+    const rawText = (await generateAIText(systemPrompt, userPrompt)) || "[]";
     const jsonMatch = rawText.match(/\[[\s\S]*\]/);
     if (!jsonMatch) return res.status(500).json({ error: "AI did not return valid JSON" });
 
@@ -378,30 +361,17 @@ agentsRouter.post("/send-email/:leadId", requireActiveSubscription, async (req, 
 
   if (!subject || !body) {
     try {
-      const openai = getOpenAI();
-      const completion = await openai.chat.completions.create({
-        model: "gpt-5-mini",
-        max_completion_tokens: 1024,
-        messages: [
-          {
-            role: "system",
-            content: `You are an expert B2B sales email writer for ${profile?.companyName || "an AI revenue automation company"}. Write concise, personalized cold outreach emails that feel human and get replies. No generic templates.`,
-          },
-          {
-            role: "user",
-            content: `Write a cold outreach email to:
+      const emailSystem = `You are an expert B2B sales email writer for ${profile?.companyName || "an AI revenue automation company"}. Write concise, personalized cold outreach emails that feel human and get replies. No generic templates.`;
+      const emailPrompt = `Write a cold outreach email to:
 Name: ${lead.name}
 Title: ${lead.title || "Decision Maker"}
 Company: ${lead.company || "their company"}
 ${profile ? `\nFrom: ${profile.companyName}\nValue Prop: ${profile.valueProp}` : ""}
 
 Return JSON: { "subject": "...", "body": "..." }
-Keep body under 150 words. No HTML. Professional but warm tone. Return ONLY JSON.`,
-          },
-        ],
-      });
+Keep body under 150 words. No HTML. Professional but warm tone. Return ONLY JSON.`;
 
-      const raw = completion.choices[0]?.message?.content || "{}";
+      const raw = (await generateAIText(emailSystem, emailPrompt)) || "{}";
       const match = raw.match(/\{[\s\S]*\}/);
       if (match) {
         const parsed = JSON.parse(match[0]);

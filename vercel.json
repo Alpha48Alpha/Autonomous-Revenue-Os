@@ -4,7 +4,8 @@
   "installCommand": "pnpm install",
   "outputDirectory": "artifacts/living-codex/dist/public",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index" }
+    { "source": "/api/(.*)", "destination": "/api/index" },
+    { "source": "/((?!assets/|favicon|robots|opengraph|.*\\.[a-zA-Z0-9]+$).*)", "destination": "/index.html" }
   ],
   "env": {
     "BASE_PATH": "/",

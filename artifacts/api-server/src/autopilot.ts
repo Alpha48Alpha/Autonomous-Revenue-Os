@@ -8,6 +8,7 @@
 
 import { db, leads, startupProfiles, messages, transactions, activities } from "@workspace/db";
 import { eq, desc, and, isNotNull, ne } from "drizzle-orm";
+import { generateAIText } from "./lib/ai";
 
 const INTERVAL_MS = 2 * 60 * 60 * 1000; // 2 hours
 const LEADS_PER_CYCLE = 5;
@@ -52,29 +53,14 @@ function personalise(template: string, name: string): string {
 }
 
 async function generateLeads(profile: typeof startupProfiles.$inferSelect) {
-  const OpenAI = (await import("openai")).default;
-  // Works on any platform: standard OPENAI_API_KEY, or Replit AI integration proxy
-  const apiKey = process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
-  const baseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || "https://api.openai.com/v1";
-  if (!apiKey) throw new Error("OpenAI API key not configured — set OPENAI_API_KEY");
-  const openai = new OpenAI({ baseURL, apiKey });
-
+  const systemPrompt = "You are a B2B lead generation AI. Return only valid JSON arrays.";
   const prompt = `Generate ${LEADS_PER_CYCLE} realistic B2B leads for outreach.
 Company context: ${profile.companyName} — ${profile.valueProp}
 Target: ${profile.icp || profile.targetMarket}
 
 Return a JSON array only. Each object: name, email, company, title, phone (US +1-format), linkedinUrl, score (60-95), notes (1 sentence why they fit).`;
 
-  const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    max_tokens: 2048,
-    messages: [
-      { role: "system", content: "You are a B2B lead generation AI. Return only valid JSON arrays." },
-      { role: "user", content: prompt },
-    ],
-  });
-
-  const raw = completion.choices[0]?.message?.content || "[]";
+  const raw = (await generateAIText(systemPrompt, prompt)) || "[]";
   const match = raw.match(/\[[\s\S]*\]/);
   if (!match) return 0;
 

@@ -11,6 +11,10 @@ out-tsc
 # dependencies
 node_modules
 
+# local env (contains DB + provider secrets)
+.env
+.env.local
+
 # IDEs and editors
 /.idea
 .project

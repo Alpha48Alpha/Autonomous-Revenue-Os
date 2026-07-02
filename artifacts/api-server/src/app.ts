@@ -3,6 +3,7 @@ import cors from "cors";
 import pinoHttp from "pino-http";
 import path from "path";
 import fs from "fs";
+import { fileURLToPath } from "url";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { WebhookHandlers } from "./webhookHandlers";
@@ -75,8 +76,10 @@ app.get("/healthz", (_req, res) => res.json({ status: "ok" }));
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
 
 // Serve React frontend static files in production
+// Use fileURLToPath (not URL.pathname) so this resolves correctly on Windows too —
+// URL.pathname yields a malformed "/D:/..." path that fs.existsSync never matches.
 const webDist = path.resolve(
-  path.dirname(new URL(import.meta.url).pathname),
+  path.dirname(fileURLToPath(import.meta.url)),
   "../../living-codex/dist/public"
 );
 if (fs.existsSync(webDist)) {
