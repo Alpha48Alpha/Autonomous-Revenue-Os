@@ -15,7 +15,13 @@ async function buildAll() {
   await rm(distDir, { recursive: true, force: true });
 
   await esbuild({
-    entryPoints: [path.resolve(artifactDir, "src/index.ts")],
+    // index.ts → dist/index.mjs (standalone server, calls app.listen — local/Railway)
+    // app.ts   → dist/app.mjs   (Express app only, no listen — imported by the
+    //                            Vercel serverless function at api/index.mjs)
+    entryPoints: [
+      path.resolve(artifactDir, "src/index.ts"),
+      path.resolve(artifactDir, "src/app.ts"),
+    ],
     platform: "node",
     bundle: true,
     format: "esm",
