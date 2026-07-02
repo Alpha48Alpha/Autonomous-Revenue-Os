@@ -7,9 +7,18 @@ interface SubscriptionGateProps {
   children: React.ReactNode;
 }
 
+// TEMP (client demo — not permanent): fully unlock every gated page on the
+// local + prod demo hosts, so the client sees the complete product. Remove this
+// block to restore normal subscription gating everywhere.
+const DEMO_HOSTS = ["localhost", "127.0.0.1", "autonomous-revenue-os.vercel.app"];
+
 export function SubscriptionGate({ children }: SubscriptionGateProps) {
   const { data: billing, isLoading } = useGetBillingStatus();
   const [, navigate] = useLocation();
+
+  if (typeof window !== "undefined" && DEMO_HOSTS.includes(window.location.hostname)) {
+    return <>{children}</>;
+  }
 
   if (isLoading) {
     return (
